@@ -1,0 +1,1079 @@
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مسابقة وتحدي الأبطال | المدارس المتقدمة الأهلية - مجمع العقيق بنين</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cairo & Tajawal -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        motaTeal: '#1f8298',
+                        motaBrightBlue: '#0099cc',
+                        motaDarkTeal: '#135666',
+                        motaGreen: '#7ab800',
+                        motaDarkGreen: '#558000',
+                        motaGold: '#f59e0b',
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'Tajawal', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: radial-gradient(circle at top right, #e6f6fa 0%, #f2f9eb 48%, #e2e8f0 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Animations */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: floatSlow 3s ease-in-out infinite;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            70% { transform: scale(1.03); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-7px); }
+            40%, 80% { transform: translateX(7px); }
+        }
+        .animate-shake {
+            animation: shakeError 0.42s ease-in-out;
+        }
+
+        /* 3D Interactive Game Buttons */
+        .game-btn-primary {
+            background: linear-gradient(135deg, #1f8298 0%, #145969 100%);
+            box-shadow: 0 5px 0 #0d3b46, 0 10px 20px rgba(31, 130, 152, 0.28);
+            transition: all 0.15s ease;
+        }
+        .game-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 #0d3b46, 0 14px 24px rgba(31, 130, 152, 0.38);
+        }
+        .game-btn-primary:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #0d3b46, 0 4px 10px rgba(31, 130, 152, 0.25);
+        }
+
+        .game-btn-green {
+            background: linear-gradient(135deg, #7ab800 0%, #588500 100%);
+            box-shadow: 0 5px 0 #3b5900, 0 10px 20px rgba(122, 184, 0, 0.3);
+            transition: all 0.15s ease;
+        }
+        .game-btn-green:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 #3b5900, 0 14px 24px rgba(122, 184, 0, 0.4);
+        }
+        .game-btn-green:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #3b5900, 0 4px 10px rgba(122, 184, 0, 0.28);
+        }
+
+        .option-card {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 2px solid #e2e8f0;
+        }
+        .option-card:hover:not(:disabled) {
+            border-color: #1f8298;
+            background-color: #f0f9ff;
+            transform: translateX(-4px);
+        }
+
+        /* Vault Digit Slot */
+        .digit-slot {
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .digit-slot.unlocked-correct {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-color: #f59e0b;
+            color: #b45309;
+            transform: scale(1.06);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+        }
+        .digit-slot.unlocked-wrong {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-color: #ef4444;
+            color: #b91c1c;
+        }
+
+        /* Certificate Styling */
+        .certificate-frame {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 5px double #1f8298;
+            position: relative;
+        }
+
+        /* Confetti Canvas */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 60;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #ffffff; }
+            .certificate-frame { box-shadow: none !important; border: 4px solid #1f8298; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col justify-between min-h-screen">
+
+    <!-- Confetti Canvas -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- Toast Notification -->
+    <div id="toastBox" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 hidden transition-all duration-300">
+        <div class="bg-slate-900/95 text-white px-6 py-3.5 rounded-2xl shadow-2xl border-2 border-motaGreen flex items-center gap-3 text-sm sm:text-base font-bold">
+            <i id="toastIcon" class="fa-solid fa-circle-check text-motaGreen text-xl"></i>
+            <span id="toastText">تم النسخ بنجاح!</span>
+        </div>
+    </div>
+
+    <!-- Teacher Reset Modal (PIN 1416) -->
+    <div id="resetModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-motaTeal animate-pop text-center space-y-4">
+            <div class="w-14 h-14 rounded-2xl bg-motaTeal/10 text-motaTeal flex items-center justify-center text-2xl mx-auto">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <h3 class="text-lg font-black text-slate-800">بوابة رائد النشاط (إعادة ضبط التجربة)</h3>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                اللعبة مبرمجة لتسمح لكل طالب بمحاولة واحدة فقط. لإعادة فتح اللعب على هذا الجهاز للتجربة، أدخل رمز النشاط (<span class="font-bold text-motaTeal">1416</span>):
+            </p>
+            <input id="adminPinInput" type="password" inputmode="numeric" maxlength="6" placeholder="أدخل الرمز السري (1416)" class="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-motaTeal focus:outline-none text-center font-black text-lg tracking-widest">
+            <p id="pinErrorMsg" class="text-xs font-bold text-red-600 hidden">الرمز غير صحيح! الرمز المعتمد هو 1416</p>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button onclick="confirmAdminReset()" class="game-btn-green text-white font-black py-2.5 rounded-xl">تأكيد وإعادة الضبط</button>
+                <button onclick="closeResetModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Action Bar -->
+    <div class="bg-motaDarkTeal text-white py-2.5 px-4 shadow-md no-print">
+        <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
+            <div class="flex items-center gap-2 font-bold">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-motaGreen animate-ping"></span>
+                <span>المدارس المتقدمة الأهلية - مجمع العقيق - بنين | النشاط الطلابي</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="copyTeacherAnnouncement()" class="bg-white/15 hover:bg-white/25 text-white px-3.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition border border-white/25 cursor-pointer">
+                    <i class="fa-brands fa-whatsapp text-green-400 text-base"></i>
+                    <span>نسخ إعلان المسابقة لقروبات الفصول</span>
+                </button>
+                <button id="soundToggleBtn" onclick="toggleSound()" class="bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition border border-white/25 cursor-pointer" title="تشغيل/كتم الصوت">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-amber-300"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 flex-grow flex flex-col gap-5">
+
+        <!-- ==================== OFFICIAL VISUAL IDENTITY HEADER ==================== -->
+        <header class="bg-white rounded-3xl shadow-xl border-b-4 border-motaTeal p-4 sm:p-6 relative overflow-hidden">
+            <!-- Subtle Decorative Accents -->
+            <div class="absolute -top-12 -left-12 w-32 h-32 bg-motaGreen/10 rounded-full pointer-events-none"></div>
+            <div class="absolute -bottom-12 -right-12 w-32 h-32 bg-motaTeal/10 rounded-full pointer-events-none"></div>
+
+            <!-- Logos & Main School Identity Row -->
+            <div class="grid grid-cols-1 md:grid-cols-12 items-center gap-4 text-center pb-5 border-b-2 border-slate-100">
+                <!-- Right Logo: Al-Motaqadimah Schools Official Vector Logo -->
+                <div class="md:col-span-3 flex flex-col items-center justify-center">
+                    <svg viewBox="0 0 260 150" class="w-44 sm:w-48 h-auto drop-shadow-sm" aria-label="شعار مدارس المتقدمة - حي العقيق">
+                        <!-- Blue Triangle 'A' Top Peak -->
+                        <polygon points="130,8 88,76 110,76 130,42 150,76 172,76" fill="#1e88a8"/>
+                        <!-- Blue 'A' Bottom Legs -->
+                        <polygon points="78,94 60,122 85,122 102,94" fill="#1e88a8"/>
+                        <polygon points="182,94 200,122 175,122 158,94" fill="#1e88a8"/>
+                        <!-- Green Open Book Wing Across Middle -->
+                        <path d="M 74 78 L 120 84 L 130 92 L 140 84 L 186 78 L 195 92 L 142 92 L 130 102 L 118 92 L 65 92 Z" fill="#7ab800"/>
+                        <!-- Founding Year 1995 - 1416 -->
+                        <text x="130" y="117" text-anchor="middle" fill="#6ca300" font-size="11.5" font-weight="900" font-family="Cairo, sans-serif">1995 - 1416</text>
+                        <!-- English Subtitle -->
+                        <text x="130" y="129" text-anchor="middle" fill="#1e293b" font-size="7.8" font-weight="700" font-family="serif">Al- Motaqadimah Schools - Al-Aqeeq District</text>
+                        <!-- Arabic Name -->
+                        <text x="130" y="141" text-anchor="middle" fill="#1e293b" font-size="11.5" font-weight="900" font-family="Cairo, sans-serif">مدارس المتقدمة - حي العقيق</text>
+                        <!-- Diploma Line -->
+                        <line x1="35" y1="147" x2="78" y2="147" stroke="#1e88a8" stroke-width="1.2"/>
+                        <text x="130" y="149" text-anchor="middle" fill="#1e88a8" font-size="8.5" font-weight="800" font-family="Cairo, sans-serif">أهلي - دبلوما أمريكية</text>
+                        <line x1="182" y1="147" x2="225" y2="147" stroke="#1e88a8" stroke-width="1.2"/>
+                    </svg>
+                </div>
+
+                <!-- Center Official Complex Identity -->
+                <div class="md:col-span-6 flex flex-col items-center justify-center space-y-2">
+                    <div class="inline-flex items-center gap-2 bg-motaTeal/10 text-motaTeal px-4 py-1 rounded-full text-xs sm:text-sm font-black border border-motaTeal/20">
+                        <i class="fa-solid fa-award text-amber-500"></i>
+                        <span>الهوية البصرية الرسمية - النشاط الطلابي</span>
+                    </div>
+                    <h1 class="text-xl sm:text-3xl font-black text-slate-900 tracking-tight leading-snug">
+                        المدارس المتقدمة الأهلية
+                    </h1>
+                    <div class="text-base sm:text-xl font-extrabold text-motaTeal">
+                        مجمع العقيق - بنين (أهلي - دبلوما أمريكية)
+                    </div>
+                </div>
+
+                <!-- Left Logo: Student Activity 5-Diamonds Official Vector Logo -->
+                <div class="md:col-span-3 flex flex-col items-center justify-center">
+                    <svg viewBox="0 0 250 145" class="w-44 sm:w-48 h-auto drop-shadow-sm" aria-label="شعار النشاط الطلابي">
+                        <!-- 1. Left Green Diamond (Scout Tent) -->
+                        <g transform="translate(50, 52)">
+                            <rect x="-19" y="-19" width="38" height="38" rx="6" transform="rotate(45)" fill="#7ab800" stroke="#5a8700" stroke-width="0.6"/>
+                            <path d="M-13,9 L0,-10 L13,9 Z" fill="#fff"/>
+                            <polygon points="0,-2 -5,9 5,9" fill="#7ab800"/>
+                        </g>
+                        <!-- 2. Top-Left Blue Diamond (Podium) -->
+                        <g transform="translate(88, 25)">
+                            <rect x="-19" y="-19" width="38" height="38" rx="6" transform="rotate(45)" fill="#0099cc" stroke="#007799" stroke-width="0.6"/>
+                            <rect x="-8" y="-6" width="16" height="3.2" rx="1" fill="#fff"/>
+                            <polygon points="-5,-2.5 5,-2.5 3.5,10 -3.5,10" fill="#fff"/>
+                            <rect x="-8" y="10" width="16" height="2.5" fill="#fff"/>
+                            <path d="M2,-6 Q8,-11 3,-12" fill="none" stroke="#fff" stroke-width="1.8"/>
+                        </g>
+                        <!-- 3. Center Green Diamond (Handshake) -->
+                        <g transform="translate(125, 55)">
+                            <rect x="-20" y="-20" width="40" height="40" rx="6" transform="rotate(45)" fill="#7ab800" stroke="#5a8700" stroke-width="0.6"/>
+                            <path d="M-12,-1 C-6,-8 6,-8 12,-1 C7,7 -7,7 -12,-1 Z" fill="#fff"/>
+                            <line x1="-6" y1="2" x2="-2" y2="7" stroke="#7ab800" stroke-width="1.7"/>
+                            <line x1="-1" y1="2" x2="3" y2="7" stroke="#7ab800" stroke-width="1.7"/>
+                            <line x1="4" y1="2" x2="7" y2="6" stroke="#7ab800" stroke-width="1.7"/>
+                        </g>
+                        <!-- 4. Top-Right Blue Diamond (Soccer Ball) -->
+                        <g transform="translate(162, 25)">
+                            <rect x="-19" y="-19" width="38" height="38" rx="6" transform="rotate(45)" fill="#0099cc" stroke="#007799" stroke-width="0.6"/>
+                            <circle cx="0" cy="0" r="11.5" fill="#fff"/>
+                            <polygon points="0,-5.5 5,-1.8 3.2,4.5 -3.2,4.5 -5,-1.8" fill="#0099cc"/>
+                            <circle cx="0" cy="0" r="11.5" fill="none" stroke="#0099cc" stroke-width="1.6"/>
+                        </g>
+                        <!-- 5. Right Green Diamond (Science Microscope & Flask) -->
+                        <g transform="translate(200, 52)">
+                            <rect x="-19" y="-19" width="38" height="38" rx="6" transform="rotate(45)" fill="#7ab800" stroke="#5a8700" stroke-width="0.6"/>
+                            <rect x="-10" y="8" width="20" height="2.8" fill="#fff"/>
+                            <path d="M-7,8 L-7,-3 L-3,-3 L-3,-9 L0,-9 L0,2 L-4,2 L-4,8 Z" fill="#fff"/>
+                            <path d="M2,8 L9,8 L7,1 L7,-4 L4,-4 L4,1 Z" fill="#fff"/>
+                        </g>
+                        <!-- Open Blue Book Base -->
+                        <path d="M 28 84 Q 95 84 125 104 Q 155 84 222 84 L 222 96 Q 155 96 125 118 Q 95 96 28 96 Z" fill="#0099cc"/>
+                        <!-- Arabic & English Activity Titles -->
+                        <text x="125" y="128" text-anchor="middle" fill="#0099cc" font-size="15.5" font-weight="900" font-family="Cairo, sans-serif">النشاط   الطلابي</text>
+                        <text x="125" y="142" text-anchor="middle" fill="#7ab800" font-size="11.5" font-weight="800" font-family="Cairo, sans-serif" letter-spacing="1.2">Student activity</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Leadership & Supervision Official Bar (Exact Layout Requested) -->
+            <div class="pt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+                <!-- Right: Activity Leader -->
+                <div class="bg-gradient-to-b from-sky-50 to-white border-2 border-motaTeal/25 rounded-2xl p-3 shadow-sm flex flex-col items-center justify-center">
+                    <span class="text-xs font-extrabold text-motaTeal mb-0.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-star text-amber-500"></i>
+                        <span>رائد النشاط</span>
+                    </span>
+                    <span class="text-base sm:text-lg font-black text-slate-900">أ. محمد قاسم</span>
+                </div>
+
+                <!-- Center: Head of Departments -->
+                <div class="bg-gradient-to-b from-lime-50 to-white border-2 border-motaGreen/35 rounded-2xl p-3 shadow-sm flex flex-col items-center justify-center">
+                    <span class="text-xs font-extrabold text-motaDarkGreen mb-0.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-sitemap text-motaGreen"></i>
+                        <span>مدير الأقسام</span>
+                    </span>
+                    <span class="text-base sm:text-lg font-black text-slate-900">أ. معتز السريبي</span>
+                </div>
+
+                <!-- Left: Executive Director of the Complex -->
+                <div class="bg-gradient-to-b from-sky-50 to-white border-2 border-motaTeal/25 rounded-2xl p-3 shadow-sm flex flex-col items-center justify-center">
+                    <span class="text-xs font-extrabold text-motaTeal mb-0.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-crown text-amber-500"></i>
+                        <span>المدير التنفيذي للمجمع</span>
+                    </span>
+                    <span class="text-base sm:text-lg font-black text-slate-900">أ. محمد شدادي</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ==================== GOLDEN DIGITAL LOCK & COUPONS BANNER ==================== -->
+        <section class="bg-slate-900 text-white rounded-3xl p-4 sm:p-5 shadow-xl border-2 border-slate-700 relative overflow-hidden">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div id="vaultLockIconBox" class="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-amber-500/20 border-2 border-amber-400/50 flex items-center justify-center text-amber-400 text-2xl animate-float shrink-0 p-3">
+                        <i id="vaultLockIcon" class="fa-solid fa-lock"></i>
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h2 class="font-black text-base sm:text-lg text-amber-400">القفل الرقمي الذهبي وجوائز الكوبونات</h2>
+                            <span id="livePointsBadge" class="bg-motaGreen text-slate-950 text-xs px-3 py-0.5 rounded-full font-black">النقاط: 0 / 100</span>
+                            <span id="liveTimerBadge" class="bg-white/10 text-sky-300 text-xs px-2.5 py-0.5 rounded-full font-bold font-mono">00:00</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mt-1">
+                            🎁 <strong class="text-amber-300">جائزة المسابقة:</strong> يتم اختيار <strong class="text-white underline">أفضل 5 فائزين من كل مرحلة (الابتدائية والمتوسطة)</strong> لمنحهم <strong class="text-motaGreen">كوبونات ألعاب مجانية!</strong> (الإجابة لمرة واحدة فقط).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 5 Digital Lock Slots -->
+                <div class="flex items-center gap-2 sm:gap-2.5 shrink-0" dir="rtl">
+                    <div id="slot-0" class="digit-slot w-11 h-14 sm:w-12 sm:h-15 rounded-2xl bg-slate-800 border-2 border-slate-600 flex flex-col items-center justify-center">
+                        <span class="text-[10px] text-slate-400">س 1</span>
+                        <span class="digit-val text-base sm:text-lg font-black text-slate-400">؟</span>
+                    </div>
+                    <div id="slot-1" class="digit-slot w-11 h-14 sm:w-12 sm:h-15 rounded-2xl bg-slate-800 border-2 border-slate-600 flex flex-col items-center justify-center">
+                        <span class="text-[10px] text-slate-400">س 2</span>
+                        <span class="digit-val text-base sm:text-lg font-black text-slate-400">؟</span>
+                    </div>
+                    <div id="slot-2" class="digit-slot w-11 h-14 sm:w-12 sm:h-15 rounded-2xl bg-slate-800 border-2 border-slate-600 flex flex-col items-center justify-center">
+                        <span class="text-[10px] text-slate-400">س 3</span>
+                        <span class="digit-val text-base sm:text-lg font-black text-slate-400">؟</span>
+                    </div>
+                    <div id="slot-3" class="digit-slot w-11 h-14 sm:w-12 sm:h-15 rounded-2xl bg-slate-800 border-2 border-slate-600 flex flex-col items-center justify-center">
+                        <span class="text-[10px] text-slate-400">س 4</span>
+                        <span class="digit-val text-base sm:text-lg font-black text-slate-400">؟</span>
+                    </div>
+                    <div id="slot-4" class="digit-slot w-11 h-14 sm:w-12 sm:h-15 rounded-2xl bg-slate-800 border-2 border-slate-600 flex flex-col items-center justify-center">
+                        <span class="text-[10px] text-slate-400">س 5</span>
+                        <span class="digit-val text-base sm:text-lg font-black text-slate-400">؟</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-800 h-2.5 rounded-full mt-4 overflow-hidden">
+                <div id="progressBar" class="bg-gradient-to-l from-motaGreen via-motaTeal to-amber-400 h-full w-0 transition-all duration-500 rounded-full"></div>
+            </div>
+        </section>
+
+        <!-- ==================== SCREEN 1: REGISTRATION & STAGE SELECTION ==================== -->
+        <section id="welcomeScreen" class="bg-white rounded-3xl shadow-xl border border-slate-200 p-5 sm:p-8 animate-pop">
+            <div class="text-center max-w-2xl mx-auto mb-6">
+                <div class="inline-flex items-center gap-2 bg-amber-100 text-amber-900 px-4 py-1.5 rounded-full text-xs sm:text-sm font-black mb-3 border border-amber-300">
+                    <i class="fa-solid fa-ticket text-amber-600"></i>
+                    <span>مسابقة كوبونات الألعاب لأفضل 5 أبطال من كل مرحلة</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-black text-motaTeal mb-2">
+                    تحدي الأبطال التفاعلي (الابتدائية والمتوسطة)
+                </h2>
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                    سجّل بياناتك واختر مرحلتك الدراسية للبدء. انتبه يا بطل: <strong class="text-red-600">يُسمح لكل طالب باللعب مرة واحدة فقط والإجابة من أول نقرة</strong>، وتظهر نتيجتك وشهادتك المعتمدة فوراً!
+                </p>
+            </div>
+
+            <!-- Step 1: Select Stage Track (Primary vs Middle) -->
+            <div class="max-w-2xl mx-auto mb-6">
+                <label class="block text-center font-black text-slate-800 text-sm sm:text-base mb-3">
+                    1️⃣ اختر المرحلة الدراسية الخاصة بك:
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button type="button" id="stageBtnPrimary" onclick="selectStageTrack('primary')" class="p-4 rounded-2xl border-3 border-motaGreen bg-lime-50/80 ring-2 ring-motaGreen flex items-center gap-4 text-right transition shadow-sm cursor-pointer">
+                        <div class="w-14 h-14 rounded-2xl bg-motaGreen text-white flex items-center justify-center text-2xl shrink-0 shadow">
+                            <i class="fa-solid fa-child-reaching"></i>
+                        </div>
+                        <div>
+                            <div class="font-black text-base sm:text-lg text-slate-900">المرحلة الابتدائية</div>
+                            <div class="text-xs font-bold text-motaDarkGreen">للصفوف من الأول إلى السادس الابتدائي</div>
+                            <span class="inline-block mt-1 bg-white text-motaDarkGreen text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border border-motaGreen/40">5 كوبونات ألعاب للفائزين</span>
+                        </div>
+                    </button>
+
+                    <button type="button" id="stageBtnMiddle" onclick="selectStageTrack('middle')" class="p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-motaTeal flex items-center gap-4 text-right transition shadow-sm cursor-pointer">
+                        <div class="w-14 h-14 rounded-2xl bg-motaTeal text-white flex items-center justify-center text-2xl shrink-0 shadow">
+                            <i class="fa-solid fa-user-astronaut"></i>
+                        </div>
+                        <div>
+                            <div class="font-black text-base sm:text-lg text-slate-900">المرحلة المتوسطة</div>
+                            <div class="text-xs font-bold text-motaTeal">للصفوف الأول والثاني والثالث المتوسط</div>
+                            <span class="inline-block mt-1 bg-sky-50 text-motaTeal text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border border-motaTeal/30">5 كوبونات ألعاب للفائزين</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Select Favorite Activity Hero -->
+            <div class="mb-6">
+                <label class="block text-center font-black text-slate-800 text-sm sm:text-base mb-3">
+                    2️⃣ اختر شخصيتك المفضلة من أبطال شعار النشاط الطلابي:
+                </label>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                    <button type="button" onclick="selectHero('الكشاف ماهر 🏕️', this)" class="hero-pick-btn flex flex-col items-center p-3 rounded-2xl border-2 border-motaGreen bg-lime-50/70 ring-2 ring-motaGreen transition text-center shadow-sm cursor-pointer">
+                        <span class="text-3xl mb-1">🏕️</span>
+                        <span class="font-extrabold text-xs sm:text-sm text-slate-800">الكشاف ماهر</span>
+                        <span class="text-[11px] text-motaDarkGreen font-bold">البيئة والنظام</span>
+                    </button>
+                    <button type="button" onclick="selectHero('الخطيب فصيح 🎙️', this)" class="hero-pick-btn flex flex-col items-center p-3 rounded-2xl border-2 border-slate-200 hover:border-motaTeal bg-white transition text-center shadow-sm cursor-pointer">
+                        <span class="text-3xl mb-1">🎙️</span>
+                        <span class="font-extrabold text-xs sm:text-sm text-slate-800">الخطيب فصيح</span>
+                        <span class="text-[11px] text-motaTeal font-bold">الإلقاء والحوار</span>
+                    </button>
+                    <button type="button" onclick="selectHero('الصديق سند 🤝', this)" class="hero-pick-btn flex flex-col items-center p-3 rounded-2xl border-2 border-slate-200 hover:border-motaGreen bg-white transition text-center shadow-sm cursor-pointer">
+                        <span class="text-3xl mb-1">🤝</span>
+                        <span class="font-extrabold text-xs sm:text-sm text-slate-800">الصديق سند</span>
+                        <span class="text-[11px] text-motaDarkGreen font-bold">الأخلاق والتعاون</span>
+                    </button>
+                    <button type="button" onclick="selectHero('الكابتن رعد ⚽', this)" class="hero-pick-btn flex flex-col items-center p-3 rounded-2xl border-2 border-slate-200 hover:border-motaTeal bg-white transition text-center shadow-sm cursor-pointer">
+                        <span class="text-3xl mb-1">⚽</span>
+                        <span class="font-extrabold text-xs sm:text-sm text-slate-800">الكابتن رعد</span>
+                        <span class="text-[11px] text-motaTeal font-bold">الرياضة والصحة</span>
+                    </button>
+                    <button type="button" onclick="selectHero('المبتكر ذكي 🔬', this)" class="hero-pick-btn col-span-2 sm:col-span-1 flex flex-col items-center p-3 rounded-2xl border-2 border-slate-200 hover:border-motaGreen bg-white transition text-center shadow-sm cursor-pointer">
+                        <span class="text-3xl mb-1">🔬</span>
+                        <span class="font-extrabold text-xs sm:text-sm text-slate-800">المبتكر ذكي</span>
+                        <span class="text-[11px] text-motaDarkGreen font-bold">العلم والابتكار</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Student Name & Class -->
+            <div class="max-w-xl mx-auto bg-slate-50 p-4 sm:p-6 rounded-2xl border border-slate-200 space-y-4">
+                <div>
+                    <label for="studentNameInput" class="block text-sm font-black text-slate-700 mb-1.5">
+                        <i class="fa-solid fa-user-graduate text-motaTeal ml-1"></i>
+                        اسم الطالب الثلاثي (مطلوب لإصدار الشهادة والترشح للكوبون):
+                    </label>
+                    <input id="studentNameInput" type="text" placeholder="اكتب اسمك الثلاثي هنا..." class="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-motaTeal focus:outline-none font-bold text-slate-800 bg-white text-sm sm:text-base">
+                    <p id="nameErrorMsg" class="text-xs font-bold text-red-600 mt-1 hidden">⚠️ فضلاً اكتب اسمك الثلاثي قبل بدء المسابقة ليتم تسجيله في الشهادة.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="studentGradeInput" class="block text-sm font-black text-slate-700 mb-1.5">
+                            <i class="fa-solid fa-school text-motaGreen ml-1"></i>
+                            الصف الدراسي:
+                        </label>
+                        <select id="studentGradeInput" class="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-motaTeal focus:outline-none font-bold text-slate-800 bg-white text-sm sm:text-base">
+                            <!-- Dynamically populated by selected stage -->
+                        </select>
+                    </div>
+                    <div>
+                        <label for="studentSectionInput" class="block text-sm font-black text-slate-700 mb-1.5">
+                            <i class="fa-solid fa-users-rectangle text-amber-500 ml-1"></i>
+                            الفصل / الشعبة:
+                        </label>
+                        <select id="studentSectionInput" class="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-motaTeal focus:outline-none font-bold text-slate-800 bg-white text-sm sm:text-base">
+                            <option value="فصل 1 / A">فصل 1 / A</option>
+                            <option value="فصل 2 / B">فصل 2 / B</option>
+                            <option value="فصل 3 / C">فصل 3 / C</option>
+                            <option value="فصل 4 / D">فصل 4 / D</option>
+                            <option value="فصل 5 / E">فصل 5 / E</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Single Attempt Warning Banner -->
+                <div class="bg-amber-50 border border-amber-300 rounded-xl p-3 flex items-start gap-2.5 text-xs text-amber-900 font-bold">
+                    <i class="fa-solid fa-circle-exclamation text-amber-600 text-base mt-0.5"></i>
+                    <span>تنبيه هام: المسابقة بنظام المحاولة الواحدة فقط لكل طالب، وعند اختيارك لأي إجابة يتم اعتمادها فوراً ولا يمكن تغييرها.</span>
+                </div>
+
+                <div class="pt-1">
+                    <button onclick="startCompetition()" class="game-btn-green w-full text-white font-black text-lg sm:text-xl py-4 px-6 rounded-2xl flex items-center justify-center gap-3 cursor-pointer">
+                        <span>ابدأ المسابقة الآن (محاولة واحدة)</span>
+                        <i class="fa-solid fa-bolt text-amber-300 text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SCREEN 2: ACTIVE QUIZ GAMEPLAY ==================== -->
+        <section id="gameScreen" class="hidden bg-white rounded-3xl shadow-xl border border-slate-200 p-5 sm:p-8">
+            <!-- Stage & Hero Banner -->
+            <div id="stageHeroBanner" class="rounded-2xl p-4 sm:p-5 mb-6 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md bg-gradient-to-l from-motaTeal to-motaDarkTeal">
+                <div class="flex items-center gap-4">
+                    <div id="stageEmojiBox" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-4xl sm:text-5xl shadow-inner shrink-0">
+                        🏕️
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <span id="stageTrackBadge" class="bg-white/20 text-white text-xs font-extrabold px-3 py-0.5 rounded-full">
+                                المرحلة الابتدائية
+                            </span>
+                            <span id="stageNumberLabel" class="bg-amber-400 text-slate-900 text-xs font-black px-3 py-0.5 rounded-full">
+                                السؤال 1 من 5
+                            </span>
+                        </div>
+                        <h3 id="stageHeroName" class="text-xl sm:text-2xl font-black">
+                            تحدي «الكشاف ماهر»
+                        </h3>
+                        <p id="stageHeroRole" class="text-white/90 text-xs sm:text-sm font-semibold">
+                            20 نقطة لهذا السؤال — اختر الإجابة الصحيحة من أول مرة!
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-white/15 px-4 py-2 rounded-xl border border-white/20 text-center shrink-0">
+                    <div class="text-[11px] text-white/80">قيمة السؤال</div>
+                    <div class="font-black text-base text-amber-300">20 نقطة 🌟</div>
+                </div>
+            </div>
+
+            <!-- Question Box -->
+            <div class="bg-slate-50 border-r-4 border-motaTeal rounded-2xl p-4 sm:p-6 mb-6 shadow-sm">
+                <div class="text-xs font-extrabold text-motaTeal mb-1.5 flex items-center justify-between">
+                    <span class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-question"></i>
+                        <span>السؤال التفاعلي (إجابة واحدة نهائية):</span>
+                    </span>
+                    <span class="text-red-600 font-bold">لا يمكن تغيير الإجابة بعد النقر</span>
+                </div>
+                <p id="stageQuestionText" class="text-base sm:text-xl font-black text-slate-800 leading-relaxed">
+                    ...
+                </p>
+            </div>
+
+            <!-- Options Container -->
+            <div id="optionsContainer" class="space-y-3.5">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Instant Lock-in Feedback Box -->
+            <div id="feedbackBox" class="hidden mt-6 rounded-2xl p-4 sm:p-5 border-2 transition-all">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-start gap-3">
+                        <div id="feedbackIcon" class="text-3xl shrink-0">🌟</div>
+                        <div>
+                            <h4 id="feedbackTitle" class="font-black text-base sm:text-lg"></h4>
+                            <p id="feedbackMessage" class="text-sm sm:text-base font-semibold mt-0.5"></p>
+                        </div>
+                    </div>
+                    <button id="nextStageBtn" onclick="goToNextQuestion()" class="game-btn-primary text-white font-black px-6 py-3.5 rounded-xl shrink-0 flex items-center gap-2 w-full sm:w-auto justify-center cursor-pointer">
+                        <span id="nextStageBtnText">السؤال التالي</span>
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SCREEN 3: FINAL RESULT & OFFICIAL CERTIFICATE ==================== -->
+        <section id="victoryScreen" class="hidden space-y-6 animate-pop">
+            <!-- Single-Attempt Locked Notice -->
+            <div class="bg-gradient-to-l from-motaDarkTeal via-motaTeal to-motaGreen text-white rounded-3xl p-5 sm:p-6 shadow-xl text-center relative overflow-hidden">
+                <div class="inline-flex items-center gap-2 bg-white/20 px-4 py-1 rounded-full text-xs font-black mb-2">
+                    <i class="fa-solid fa-shield-halved text-amber-300"></i>
+                    <span>تم اعتماد المحاولة الرسمية الوحيدة للطالب بنجاح</span>
+                </div>
+                <h2 id="resultBannerTitle" class="text-2xl sm:text-3xl font-black mb-1">
+                    أحسنت يا بطل المتقدمة! ظهرت نتيجتك الفورية
+                </h2>
+                <p id="resultBannerSubtitle" class="font-bold text-sm sm:text-base text-sky-100">
+                    انسخ شهادتك الآن وأرسلها في قروب الفصل لتدخل فرز أفضل 5 فائزين بكوبونات الألعاب!
+                </p>
+            </div>
+
+            <!-- Official High-Design Certificate -->
+            <div class="certificate-frame rounded-3xl p-5 sm:p-8 shadow-2xl">
+                <!-- Certificate Top Logos & Header -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 items-center gap-3 border-b-2 border-dashed border-slate-200 pb-4 mb-5 text-center">
+                    <div class="flex justify-center">
+                        <div class="text-right sm:text-center">
+                            <div class="font-black text-sm sm:text-base text-motaTeal">المدارس المتقدمة الأهلية</div>
+                            <div class="text-xs font-extrabold text-slate-600">مجمع العقيق - بنين (1995 - 1416)</div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center">
+                        <div class="inline-flex items-center gap-1.5 bg-amber-400 text-slate-950 px-4 py-1 rounded-full text-xs font-black shadow-sm">
+                            <i class="fa-solid fa-medal"></i>
+                            <span>شهادة استحقاق ونقاط المسابقة</span>
+                        </div>
+                        <div id="certVerificationCode" class="text-[11px] font-mono font-bold text-slate-500 mt-1">
+                            كود التوثيق: #AQ-1416
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center">
+                        <div class="text-left sm:text-center">
+                            <div class="font-black text-sm sm:text-base text-motaDarkGreen">النشاط الطلابي</div>
+                            <div class="text-xs font-extrabold text-motaTeal">Student Activity</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Student Details & Score -->
+                <div class="text-center space-y-3 my-4">
+                    <p class="text-xs sm:text-sm font-bold text-slate-600">
+                        تشهد إدارة النشاط الطلابي بـ <strong class="text-slate-900">المدارس المتقدمة الأهلية - مجمع العقيق بنين</strong> بأن البطل:
+                    </p>
+                    <div id="certStudentName" class="text-2xl sm:text-3xl font-black text-motaTeal bg-sky-50 border-2 border-sky-200 inline-block px-7 py-2.5 rounded-2xl shadow-sm">
+                        اسم الطالب
+                    </div>
+
+                    <!-- Score & Stats Pills -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 max-w-2xl mx-auto pt-3">
+                        <div class="bg-slate-50 border border-slate-200 p-2.5 rounded-2xl">
+                            <div class="text-[11px] text-slate-500 font-bold">المرحلة الدراسية</div>
+                            <div id="certStageName" class="font-black text-xs sm:text-sm text-motaTeal">المرحلة الابتدائية</div>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200 p-2.5 rounded-2xl">
+                            <div class="text-[11px] text-slate-500 font-bold">الصف والفصل</div>
+                            <div id="certStudentGrade" class="font-black text-xs sm:text-sm text-slate-800">الصف الأول</div>
+                        </div>
+                        <div class="bg-amber-50 border-2 border-amber-300 p-2.5 rounded-2xl">
+                            <div class="text-[11px] text-amber-800 font-bold">مجموع النقاط</div>
+                            <div id="certScorePoints" class="font-black text-base sm:text-lg text-amber-600">100 / 100</div>
+                        </div>
+                        <div class="bg-lime-50 border border-lime-300 p-2.5 rounded-2xl">
+                            <div class="text-[11px] text-motaDarkGreen font-bold">زمن الإنجاز</div>
+                            <div id="certTimeTaken" class="font-black text-xs sm:text-sm text-motaDarkGreen">25 ثانية</div>
+                        </div>
+                    </div>
+
+                    <!-- Coupon Eligibility Status -->
+                    <div id="certCouponStatusBox" class="max-w-xl mx-auto mt-4 p-3 rounded-2xl border-2 border-motaGreen bg-lime-50/80 text-xs sm:text-sm font-extrabold text-motaDarkGreen">
+                        🎟️ مؤهل لدخول فرز أفضل 5 فائزين في المرحلة للحصول على كوبون ألعاب!
+                    </div>
+                </div>
+
+                <!-- Answered Lock Summary -->
+                <div class="bg-slate-900 text-white rounded-2xl p-3.5 my-5 text-center max-w-lg mx-auto border-2 border-amber-400 shadow">
+                    <div class="text-xs text-amber-300 font-bold mb-1.5">🔐 سجل إجابات المحاولة الوحيدة (5 أسئلة):</div>
+                    <div id="certLockSummary" class="flex items-center justify-center gap-2 font-black text-sm sm:text-base tracking-wide">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Three Official Leadership Signatures (Exact Requested Order) -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t-2 border-slate-200 text-center">
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                        <div class="text-xs font-extrabold text-motaTeal mb-1">رائد النشاط</div>
+                        <div class="text-sm sm:text-base font-black text-slate-900">أ. محمد قاسم</div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                        <div class="text-xs font-extrabold text-motaDarkGreen mb-1">مدير الأقسام</div>
+                        <div class="text-sm sm:text-base font-black text-slate-900">أ. معتز السريبي</div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                        <div class="text-xs font-extrabold text-motaTeal mb-1">المدير التنفيذي للمجمع</div>
+                        <div class="text-sm sm:text-base font-black text-slate-900">أ. محمد شدادي</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons for Sharing to WhatsApp Groups -->
+            <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-xl border border-slate-200 space-y-4 no-print">
+                <h4 class="text-center font-black text-base sm:text-lg text-slate-800">
+                    📲 أرسل شهادتك ونتيجتك الآن إلى قروب الواتساب لاعتماد نقاطك في السحب على الكوبونات!
+                </h4>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <button onclick="copyStudentVictoryCard()" class="game-btn-green text-white font-black py-4 px-5 rounded-2xl flex items-center justify-center gap-2.5 text-base sm:text-lg cursor-pointer">
+                        <i class="fa-solid fa-copy text-xl"></i>
+                        <span>نسخ الشهادة والنتيجة لقروب الواتساب</span>
+                    </button>
+
+                    <button onclick="shareViaWhatsApp()" class="game-btn-primary text-white font-black py-4 px-5 rounded-2xl flex items-center justify-center gap-2.5 text-base sm:text-lg cursor-pointer">
+                        <i class="fa-brands fa-whatsapp text-2xl text-green-300"></i>
+                        <span>إرسال مباشر عبر واتساب</span>
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+                    <button onclick="window.print()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-5 rounded-xl flex items-center gap-2 text-sm transition cursor-pointer">
+                        <i class="fa-solid fa-print text-motaTeal"></i>
+                        <span>طباعة / حفظ الشهادة PDF</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== OFFICIAL CONTACT FOOTER CAPSULE (Exact Match to Image 3) ==================== -->
+    <footer class="max-w-5xl w-full mx-auto px-3 sm:px-6 pb-6 mt-2">
+        <div class="bg-[#1f8298] text-white rounded-full py-3.5 px-6 shadow-xl border-2 border-white/30 flex flex-wrap items-center justify-between gap-4 text-xs sm:text-sm">
+            <!-- Right: Customer Service -->
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-full border-2 border-white/80 flex items-center justify-center text-lg shrink-0">
+                    <i class="fa-solid fa-headset"></i>
+                </div>
+                <div class="leading-tight">
+                    <div class="font-bold text-white/95">خدمة العملاء</div>
+                    <div class="font-black text-sm sm:text-base tracking-wider" dir="ltr">920012991</div>
+                </div>
+            </div>
+
+            <!-- Center-Right: Location -->
+            <div class="flex items-center gap-2">
+                <div class="w-9 h-9 rounded-full border-2 border-white/80 flex items-center justify-center text-lg shrink-0">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div class="leading-tight font-bold">
+                    <div>مدينة الرياض</div>
+                    <div>حي العقيق</div>
+                </div>
+            </div>
+
+            <!-- Center-Left: Social Media Icons & Website -->
+            <div class="flex flex-col items-center sm:items-start gap-1">
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="w-6 h-6 rounded border border-white/80 flex items-center justify-center"><i class="fa-brands fa-snapchat"></i></span>
+                    <span class="w-6 h-6 rounded border border-white/80 flex items-center justify-center"><i class="fa-brands fa-instagram"></i></span>
+                    <span class="w-6 h-6 rounded border border-white/80 flex items-center justify-center"><i class="fa-brands fa-youtube"></i></span>
+                    <span class="w-6 h-6 rounded border border-white/80 flex items-center justify-center"><i class="fa-brands fa-x-twitter"></i></span>
+                    <span class="w-6 h-6 rounded border border-white/80 flex items-center justify-center"><i class="fa-brands fa-facebook-f"></i></span>
+                    <span class="font-black tracking-wide mr-1" dir="ltr">0550004007</span>
+                </div>
+                <div class="flex items-center gap-3 text-xs font-bold tracking-wide" dir="ltr">
+                    <span><i class="fa-solid fa-globe mr-1"></i>www.msc.edu.sa</span>
+                    <span>@Alaqeqmsc</span>
+                </div>
+            </div>
+
+            <!-- Left: Public Relations -->
+            <div class="flex items-center gap-2">
+                <div class="leading-tight text-left sm:text-right font-bold">
+                    <div>إدارة العلاقات</div>
+                    <div>العــــامــــة</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discreet Activity Leader Reset Link -->
+        <div class="text-center mt-3 no-print">
+            <button onclick="openResetModal()" class="text-[11px] text-slate-400 hover:text-motaTeal font-semibold transition cursor-pointer">
+                <i class="fa-solid fa-lock text-[10px] ml-1"></i>بوابة رائد النشاط (إعادة ضبط الجهاز للتجربة)
+            </button>
+        </div>
+    </footer>
+
+    <!-- ==================== APPLICATION LOGIC & QUESTION BANKS ==================== -->
+    <script>
+        const STORAGE_KEY = 'motaqadimah_aqeeq_boys_competition_v2';
+
+        // ==================== WEB AUDIO SYNTHESIZER ====================
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playTone(freq, type, duration, delay = 0, vol = 0.16) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(audioCtx.currentTime + delay);
+                osc.stop(audioCtx.currentTime + delay + duration);
+            } catch (e) {}
+        }
+
+        function playSuccessSound() {
+            playTone(523.25, 'sine', 0.13, 0, 0.18);
+            playTone(659.25, 'sine', 0.13, 0.09, 0.18);
+            playTone(783.99, 'sine', 0.26, 0.18, 0.22);
+        }
+
+        function playErrorSound() {
+            playTone(250, 'triangle', 0.16, 0, 0.15);
+            playTone(195, 'triangle', 0.24, 0.12, 0.15);
+        }
+
+        function playVictoryFanfare() {
+            playTone(523.25, 'triangle', 0.14, 0.0, 0.2);
+            playTone(659.25, 'triangle', 0.14, 0.14, 0.2);
+            playTone(783.99, 'triangle', 0.14, 0.28, 0.2);
+            playTone(1046.50, 'triangle', 0.45, 0.42, 0.24);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-amber-300';
+                playSuccessSound();
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-300';
+            }
+        }
+
+        // ==================== QUESTION BANKS (PRIMARY & MIDDLE STAGES) ====================
+        const questionBanks = {
+            primary: [
+                {
+                    heroName: 'الكشاف ماهر',
+                    heroEmoji: '🏕️',
+                    themeGradient: 'from-motaGreen to-motaDarkGreen',
+                    question: 'بعد انتهاء الفسحة في ساحة المدارس المتقدمة، وجد «ماهر» عبوة ماء فارغة على الأرض. ما التصرف الصحيح الذي يكسبك 20 نقطة؟',
+                    options: [
+                        { num: 1, text: 'أتركها في مكانها لأنني لم أرمِها.' },
+                        { num: 2, text: 'أبادر برفعها ووضعها في سلة المهملات؛ لأن نظافة مدرستي مسؤوليتي وافتخاري.' },
+                        { num: 3, text: 'أبعدها بقدمي إلى طرف الممر.' }
+                    ],
+                    correctNum: 2,
+                    explanation: 'ممتاز يا بطل! المحافظة على نظافة مدرستنا دليل على الأخلاق العالية.'
+                },
+                {
+                    heroName: 'الخطيب فصيح',
+                    heroEmoji: '🎙️',
+                    themeGradient: 'from-motaTeal to-motaDarkTeal',
+                    question: 'سؤال ثقافي ووطني: ما هي عاصمة مملكتنا الحبيبة (المملكة العربية السعودية) التي تقع فيها مدارسنا بحي العقيق؟',
+                    options: [
+                        { num: 1, text: 'مدينة الرياض.' },
+                        { num: 2, text: 'مدينة جدة.' },
+                        { num: 3, text: 'مدينة الدمام.' }
+                    ],
+                    correctNum: 1,
+                    explanation: 'إجابة صحيحة! الرياض هي عاصمة المملكة العربية السعودية وفيها يقع مجمع العقيق.'
+                },
+                {
+                    heroName: 'الصديق سند',
+                    heroEmoji: '🤝',
+                    themeGradient: 'from-motaGreen to-motaDarkGreen',
+                    question: 'انضم طالب جديد إلى فصلك اليوم وكان يجلس وحيداً. كيف تتصرف معه كبطل متعاون؟',
+                    options: [
+                        { num: 1, text: 'أتجاهله وألعب مع أصدقائي القدامى فقط.' },
+                        { num: 2, text: 'أنتظر حتى ينتهي الأسبوع ثم أتحدث معه.' },
+                        { num: 3, text: 'أبادر بالسلام عليه بابتسامة، وأرحب به وأعرفه على زملاء الفصل.' }
+                    ],
+                    correctNum: 3,
+                    explanation: 'رائع! الترحيب بالزملاء الجدد من أجمل صور الأخوة والتعاون.'
+                },
+                {
+                    heroName: 'الكابتن رعد',
+                    heroEmoji: '⚽',
+                    themeGradient: 'from-motaTeal to-motaDarkTeal',
+                    question: 'لكي تحصل على نشاط وتركيز عالٍ في الحصص الدراسية وحصة الرياضة، ما هي العادة الصحية السليمة؟',
+                    options: [
+                        { num: 1, text: 'السهر لوقت متأخر وعدم تناول وجبة الإفطار.' },
+                        { num: 2, text: 'النوم المبكر، وتناول فطور صحي، وشرب الماء بانتظام، والتحلي بالروح الرياضية.' },
+                        { num: 3, text: 'الإكثار من المشروبات الغازية والحلويات صباحاً.' }
+                    ],
+                    correctNum: 2,
+                    explanation: 'أحسنت يا كابتن! النوم المبكر والغذاء الصحي أساس التفوق الدراسي والبدني.'
+                },
+                {
+                    heroName: 'المبتكر ذكي',
+                    heroEmoji: '🔬',
+                    themeGradient: 'from-motaGreen to-motaDarkGreen',
+                    question: 'أثناء استخدامك للإنترنت أو الألعاب الإلكترونية، طلب منك شخص غريب كلمة المرور أو معلوماتك الخاصة مقابل جوائز وهمية. ماذا تفعل؟',
+                    options: [
+                        { num: 1, text: 'أرفض إعطاءه أي معلومة سرية، وأغلق المحادثة فوراً وأخبر والديّ.' },
+                        { num: 2, text: 'أرسل له كلمة المرور بسرعة لأحصل على الجائزة.' },
+                        { num: 3, text: 'أرسل له رقم هاتف صديقي بدلاً من رقمي.' }
+                    ],
+                    correctNum: 1,
+                    explanation: 'بطل ذكي! الحفاظ على أسرارك وإبلاغ والديك يحميك دائماً في العالم الرقمي.'
+                }
+            ],
+            middle: [
+                {
+                    heroName: 'الكشاف ماهر',
+                    heroEmoji: '🏕️',
+                    themeGradient: 'from-motaGreen to-motaDarkGreen',
+                    question: 'سؤال وطني وثقافي: في أي عامٍ هجري وميلادي تأسست مدارس المتقدمة (كما يظهر في شعار المدرسة الرسمي)؟',
+                    options: [
+                        { num: 1, text: 'عام 1425هـ الموافق 2004م.' },
+                        { num: 2, text: 'عام 1416هـ الموافق 1995م.' },
+                        { num: 3, text: 'عام 1435هـ الموافق 2014م.' }
+                    ],
+                    correctNum: 2,
+                    explanation: 'دقة ممتازة! تأسست مدارس المتقدمة عام 1995م الموافق 1416هـ.'
+                },
+                {
+                    heroName: 'الخطيب فصيح',
+                    heroEmoji: '🎙️',
+                    themeGradient: 'from-motaTeal to-motaDarkTeal',
+                    question: 'خلال نقاش علمي في الفصل، طرح زميلك وجهة نظر تختلف مع رأيك. ما هو أسلوب الحوار الحضاري؟',
+                    options: [
+                        { num: 1, text: 'أستمع لوجهة نظره باحترام حتى ينتهي، ثم أناقش الفكرة بأدب وحجة علمية هادئة.' },
+                        { num: 2, text: 'أقاطعه بصوت مرتفع لأثبت أن رأيي هو الصحيح.' },
+                        { num: 3, text: 'أسخر من فكرته أمام زملاء الفصل.' }
+                    ],
+                    correctNum: 1,
+                    explanation: 'أحسنت! أدب الحوار واحترام الرأي الآخر علامة النضج والتميز الأخلاقي.'
+                },
+                {
+                    heroName: 'الصديق سند',
+                    heroEmoji: '🤝',
+                    themeGradient: 'from-motaGreen to-motaDarkGreen',
+                    question: 'في مشروع جماعي للفصل، واجه أحد أعضاء فريقك صعوبة في إنجاز مهمته. ما التصرف القيادي الأفضل؟',
+                    options: [
+                        { num: 1, text: 'ألومه أمام المعلم وأطلب استبعاده من المجموعة.' },
+                        { num: 2, text: 'أترك المشروع يتعثر دون مساعدة.' },
+                        { num: 3, text: 'أبادر بمساندته وتوضيح النقاط الصعبة له بروح الفريق الواحد لينجح المشروع.' }
+                    ],
+                    correctNum: 3,
+                    explanation: 'عمل جماعي رائع! القائد الحقيقي يسند فريقه ويتعاون معهم لتحقيق النجاح.'
+                },
+                {
+                    heroName: 'الكابتن رعد',
+                    heroEmoji: '⚽',
+                    themeGradient: 'from-motaTeal to-motaDarkTeal',
+                    question: 'معلومة علمية وصحية: أي عنصر غذائي مما يلي يُعد الأساس لبناء العضلات وتجديد خلايا الجسم لدى الشاب الرياضي؟',
+                    options: [
+                        { num: 1, text: 'السكريات الصناعية والمشروبات الغازية.' },
+                        { num: 2, text: 'البروتينات الصحية (مثل اللحوم، البيض، البقوليات، والألبان) مع شرب الماء.' },
+                        { num: 3, text: 'الدهون المهدرجة والمقليات.' }
+                    ],
+                    correctNum: 2,
+                    explanation: 'إجابة علمية صحيحة! البروتينات والماء أساس بناء الجسم السليم واللياقة العالية.'
+                },
+                {
+                    heroName: 'المبتكر ذكي',
+                    heroEmoji: '🔬',
+                    themeGradient: 'from-motaGreen to-motaDarkGreen',
+                    question: 'في الأمن السيبراني: وصلتك رسالة تحتوي على رابط غير معروف يدّعي أنه يحدث حسابك المدرسي ويطلب رمز التحقق (OTP). ما الإجراء الصحيح؟',
+                    options: [
+                        { num: 1, text: 'أدرك أنها محاولة تصيّد احتيالي (Phishing)، فلا أضغط على الرابط ولا أشارك رمز التحقق أبداً.' },
+                        { num: 2, text: 'أضغط على الرابط وأكتب رمز التحقق فوراً.' },
+                        { num: 3, text: 'أعيد إرسال الرابط إلى قروبات زملائي في المدرسة.' }
+                    ],
+                    correctNum: 1,
+                    explanation: 'وعي سيبراني ممتاز! عدم مشاركة رموز التحقق وتجنب الروابط المشبوهة يحميك من الاختراق.'
+                }
+            ]
+        };
+
+        const gradeOptionsByStage = {
+            primary: [
+                'الصف الأول الابتدائي',
+                'الصف الثاني الابتدائي',
+                'الصف الثالث الابتدائي',
+                'الصف الرابع الابتدائي',
+                'الصف الخامس الابتدائي',
+                'الصف السادس الابتدائي'
+            ],
+            middle: [
+                'الصف الأول المتوسط',
+                'الصف الثاني المتوسط',
+                'الصف الثالث المتوسط'
+            ]
+        };
+
+        // ==================== STATE VARIABLES ====================
+        let selectedStageTrack = 'primary'; // 'primary' or 'middle'
+        let selectedHeroCharacter = 'الكشاف ماهر 🏕️';
+        let studentName = '';
+        let studentGrade = '';
+        let studentSection = '';
+        let currentQuestionIndex = 0;
+        let currentScore = 0;
+        let recordedAnswers = []; // stores { qNum, chosen, correct, isRight }
+        let questionLocked = false;
+        let startTimeMs = 0;
+        let elapsedSeconds = 0;
+        let timerInterval = null;
+        let verificationCode = '';
+
+        // ==================== INITIALIZATION ====================
+        window.addEventListener('DOMContentLoaded', () => {
+            populateGradeDropdown('primary');
+            checkExistingAttempt();
+        });
+
+        function populateGradeDropdown(stageKey) {
+            const select = document.getElementById('studentGradeInput');
+            select.innerHTML = '';
+            gradeOptionsByStage[stageKey].forEach(gradeName => {
+                const opt = document.createElement('option');
+                opt.value = gradeName;
+                opt.textContent = gradeName;
+                select.appendChild(opt);
+            });
+        }
+
+        function selectStageTrack(stageKey) {
+            selectedStageTrack = stageKey;
+            playTone(620, 'sine', 0.08);
+
+            const btnPrimary = document.getElementById('stageBtnPrimary');
+            const btnMiddle = document.getElementById('stageBtnMiddle');
+
+            if (stageKey === 'primary') {
+                btnPrimary.className = 'p-4 rounded-2xl border-2 border-motaGreen bg-lime-50/80 ring-2 ring-motaGreen flex items-center gap-4 text-right transition shadow-sm cursor-pointer';
+                btnMiddle.className = 'p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-motaTeal flex items-center gap-4 text-right transition shadow-sm cursor-pointer';
+            } else {
+                btnMiddle.className = 'p-4 rounded-2xl border-2 border-motaTeal bg-sky-50/80 ring-2 ring-motaTeal flex items-center gap-4 text-right transition shadow-sm cursor-pointer';
+                btnPrimary.className = 'p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-motaGreen flex items-center gap-4 text-right transition shadow-sm cursor-pointer';
+            }
+
+            populateGradeDropdown(stageKey);
+        }
+
+        function selectHero(heroTitle, btnEl) {
+            selectedHeroCharacter = heroTitle;
+            playTone(580, 'sine', 0.08);
+            document.querySelectorAll('.hero-pick-btn').forEach(b => {
+                b.className = 'hero-pick-btn flex flex-col items-center p-3 rounded-2xl border-2 border-slate-200 bg-white transition text-center shadow-sm cursor-pointer';
+            });
+            btnEl.className = 'hero-pick-btn flex flex-col items-center p-3 rounded-2xl border-2 border-motaGreen bg-lime-50/70 ring-2 ring-motaGreen transition text-center shadow-sm cursor-pointer';
+        }
+
+        // ==================== CHECK SINGLE ATTEMPT LOCK ====================
+        function checkExistingAttempt() {
+            try {
+                const savedRaw = localStorage.getItem(STORAGE_KEY);
+                if (!savedRaw) return;
+                const savedData = JSON.parse(savedRaw);
+                if (savedData && savedData.completed) {
+                    // Restore state and display certificate immediately
+                    selectedStageTrack = savedData.selectedStageTrack || 'primary';
+                    selectedHeroCharacter = savedData.selectedHeroCharacter || 'الكشاف ماهر 🏕️';
+                    studentName = savedData.studentName;
+                    studentGrade = savedData.studentGrade;
+                    studentSection = savedData.studentSection;
+                    currentScore = savedData.currentScore;
+                    elapsedSeconds = savedData.elapsedSeconds || 0;
+                    recordedAnswers = savedData.recordedAnswers || [];
+                    verificationCode = savedData.verificationCode || '#AQ-1416';
+
+                    restoreVaultBarFromSaved();
+                    displayFinalCertificate(true);
+                }
+            } catch (e) {}
+        }
+
+        function restoreVaultBarFromSaved() {
+            document.getElementById('livePointsBadge').textContent = `النقاط: ${currentScore} / 100`;
+            document.getElementById('liveTimerBadge').textContent = formatTime(elapsedSeconds);
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('vaultLockIcon').className = 'fa-solid fa-lock-open text-motaGreen';
+
+            recordedAnswers.forEach((ans, idx) => {
+                c
